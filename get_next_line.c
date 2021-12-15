@@ -6,7 +6,7 @@
 /*   By: iel-moha <iel-moha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 10:25:44 by iel-moha          #+#    #+#             */
-/*   Updated: 2021/12/15 18:23:43 by iel-moha         ###   ########.fr       */
+/*   Updated: 2021/12/15 19:00:17 by iel-moha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,17 +72,16 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (new);
 }
 
-char    *get_next_line(int fd)
+char    *get_line(int fd , char *buffer)
 {
     char    *line;
-    static char *buffer;
     int i;
 
     buffer = (char *)malloc(BUFFER_SIZE + 1);
     if(!buffer)
         return (NULL);
     line = malloc(1);
-    while(i && !check_newline(line))
+    while(i && !check_newline(line)) 
     {
         i = read(fd, buffer, BUFFER_SIZE);
         if (i == -1)
@@ -96,14 +95,28 @@ char    *get_next_line(int fd)
     free(buffer);
     return (line);
 }
+char    *get_next_line(int fd)
+{
+	static char *buffer;
+	char *line;
+	
+	if(BUFFER_SIZE <= 0 || fd < 0)
+	{
+		return (NULL);
+	}
+	buffer = get_line(fd, buffer);
+	if(!buffer)
+		return (NULL);
+	line = ft_before(buffer);
+	return(line);
+}
 int main()
 {
-    int fd;
-
-    char *s;
-    fd = open("t.txt", O_RDONLY);
-    s = get_next_line(fd);
-    printf("%s", s);
+    int fd = open("Imoon.txt", O_RDONLY);
     printf("%s", get_next_line(fd));
+    //printf("%s", get_next_line(fd));
+    //printf("%s", get_next_line(fd));
+    //printf("%s", get_next_line(fd));
+    //printf("%s", get_next_line(fd));
     //system("leaks a.out");
 }
