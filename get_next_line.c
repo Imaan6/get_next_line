@@ -6,15 +6,27 @@
 /*   By: iel-moha <iel-moha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 10:25:44 by iel-moha          #+#    #+#             */
-/*   Updated: 2021/12/15 13:06:02 by iel-moha         ###   ########.fr       */
+/*   Updated: 2021/12/15 18:23:43 by iel-moha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int check_newline(char *buffer)
+size_t	ft_strlen(const char *s)
 {
-    int i;
+	size_t	i;
+
+	i = 0;
+	while (s[i] != '\0')
+	{
+		i++;
+	}
+	return (i);
+}
+
+short check_newline(char *buffer)
+{
+    short i;
     
     i = 0;
     while(buffer[i])
@@ -25,46 +37,73 @@ int check_newline(char *buffer)
     }
     return (0);
 }
-/*char    *get_new_line(int fd)
-{
-    char    *buffer;
 
-    buffer = (char *)malloc(BUFFER_SIZE);
-    if(!buffer)
-        return (NULL);
-    read(fd, buffer, BUFFER_SIZE);
-    if(check_newline(buffer) == 1)
-        printf("This is a line");
-    else
-        printf("This is not a line");
-    return (buffer);    
-}*/
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*new;
+	size_t	i;
+	int		j;
+
+	if (!s1 && !s2)
+		return (NULL);
+    if(!s1)
+    {
+        s1 = malloc(1);
+        *s1 = '\0';
+    }
+	new = (char *) malloc ((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
+	if (!new)
+		return (NULL);
+	i = 0;
+	while (i < ft_strlen(s1))
+	{
+		new[i] = (char)s1[i];
+		i++;
+	}
+	j = 0;
+	while (i < (ft_strlen(s1) + ft_strlen(s2)))
+	{
+		new[i] = (char)s2[j];
+		i++;
+		j++;
+	}
+	new[i] = '\0';
+    free(s1);
+	return (new);
+}
+
 char    *get_next_line(int fd)
 {
-    static char *str;
     char    *line;
-    char    *buffer;
+    static char *buffer;
     int i;
 
-    buffer = (char *)malloc(BUFFER_SIZE);
+    buffer = (char *)malloc(BUFFER_SIZE + 1);
     if(!buffer)
         return (NULL);
-    read(fd, buffer, BUFFER_SIZE);
-    while(!check_newline(buffer))
+    line = malloc(1);
+    while(i && !check_newline(line))
     {
-        read(fd, buffer, BUFFER_SIZE);
-        i++;
+        i = read(fd, buffer, BUFFER_SIZE);
+        if (i == -1)
+        {
+            free(buffer);
+            return (NULL);
+        }
+        buffer[i] = '\0';
+        line = ft_strjoin(line, buffer);
     }
-    line = (char * )malloc((i*BUFFER_SIZE) + 1);
-    return (buffer);
+    free(buffer);
+    return (line);
 }
 int main()
 {
     int fd;
 
     char *s;
-    fd = open("Imoon.txt", O_RDONLY);
+    fd = open("t.txt", O_RDONLY);
     s = get_next_line(fd);
     printf("%s", s);
+    printf("%s", get_next_line(fd));
     //system("leaks a.out");
 }
