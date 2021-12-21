@@ -6,117 +6,199 @@
 /*   By: iel-moha <iel-moha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 10:25:44 by iel-moha          #+#    #+#             */
-/*   Updated: 2021/12/15 19:00:17 by iel-moha         ###   ########.fr       */
+/*   Updated: 2021/12/21 11:13:41 by iel-moha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
+	char	*sub_s;
 	size_t	i;
 
+	if (!s)
+		return (NULL);
+	/*if (len > ft_strlen(s))
+		len = ft_strlen(s);
+	if (start >= ft_strlen(s))
+		return (ft_strdup(""));*/
+	sub_s = (char *)malloc((len + 1) * sizeof(char));
+	if (!sub_s)
+		return (NULL);
 	i = 0;
-	while (s[i] != '\0')
+	while (i < len)
 	{
+		sub_s[i] = (char)s[start];
 		i++;
+		start++;
 	}
-	return (i);
+	sub_s[i] = '\0';
+	return (sub_s);
 }
 
-short check_newline(char *buffer)
+int    ft_strlen(char *s)
 {
-    short i;
-    
+    int    i;
+
     i = 0;
+    if(!s)
+        return (0);
+    while (s[i])
+        i++;
+    return (i);
+}
+
+int check_newline(char *buffer)
+{
+    int i;
+
+    i = 0;
+    if(!buffer)
+        return (0);
     while(buffer[i])
     {
        if(buffer[i] == '\n')
-            return (1);
+            return (i);
         i++;
     }
-    return (0);
+    return (-1);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
+char    *ft_strjoin(char *s1, char *s2)
 {
-	char	*new;
-	size_t	i;
-	int		j;
+    char    *new;
+    int i;
+    int j;
 
-	if (!s1 && !s2)
-		return (NULL);
+    if (!s1 && !s2)
+        return (NULL);
     if(!s1)
     {
         s1 = malloc(1);
-        *s1 = '\0';
+        s1[0] = 0;
     }
-	new = (char *) malloc ((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
-	if (!new)
-		return (NULL);
-	i = 0;
-	while (i < ft_strlen(s1))
-	{
-		new[i] = (char)s1[i];
-		i++;
-	}
-	j = 0;
-	while (i < (ft_strlen(s1) + ft_strlen(s2)))
-	{
-		new[i] = (char)s2[j];
-		i++;
-		j++;
-	}
-	new[i] = '\0';
+    new = malloc (ft_strlen(s1) + ft_strlen(s2) + 1);
+    if (!new)
+        return (NULL);
+    i = 0;
+    j = 0;
+    while (s1[j])
+        new[i++] = s1[j++];
+    j = 0;
+    while (s2[j])
+        new[i++] = s2[j++];
+    new[i] = '\0';
     free(s1);
-	return (new);
+    return (new);
 }
-
-char    *get_line(int fd , char *buffer)
+char	*ft_strdup(char *s1)
 {
-    char    *line;
+	char	*dup;
+	int		i;
+
+	i = 0;
+	while (s1[i])
+		i++;
+	dup = malloc((i + 1) * sizeof (char));
+	if (dup == 0)
+		return (0);
+	dup[i] = '\0';
+	while (i >= 0)
+	{
+		dup[i] = s1[i];
+		i--;
+	}
+	return (dup);
+}
+char    *get_line(int fd, char *buffer)
+{
+    char    *tmp;
+    
     int i;
 
-    buffer = (char *)malloc(BUFFER_SIZE + 1);
-    if(!buffer)
+    i = 1;
+    tmp = malloc(BUFFER_SIZE + 1);
+    if(!tmp)
         return (NULL);
-    line = malloc(1);
-    while(i && !check_newline(line)) 
+    //line = malloc(1);
+    while(i && check_newline(buffer) == -1) 
     {
-        i = read(fd, buffer, BUFFER_SIZE);
+        i = read(fd, tmp, BUFFER_SIZE);
         if (i == -1)
         {
-            free(buffer);
+            free(tmp);
             return (NULL);
         }
-        buffer[i] = '\0';
-        line = ft_strjoin(line, buffer);
+        tmp[i] = '\0';
+        buffer = ft_strjoin(buffer, tmp);
     }
-    free(buffer);
-    return (line);
+    
+    free(tmp);
+    return (buffer);
+}
+char    *before_line(char *s)
+{
+    int i;
+    char *p;
+
+    i = 0;
+    while(s[i] && s[i] != '\n')
+        i++;
+    if (s[i])
+        i++;    
+    p = ft_substr(s, i, (ft_strlen(s) - i));
+    free(s);
+    //printf("%s", p);
+    return (p);
+}
+char    *one_line(char *s)
+{
+    char    *p;
+    int i;
+    int j;
+    
+    i = 0;
+    j = 0;
+    while(s && s[i] && s[i] != '\n')
+        i++;
+    p = malloc(i + 2);
+    while(s[j] != '\n')
+    {
+        p[j] = s[j];
+        j++;
+    }
+    p[j++] = '\n';
+    p[j] = '\0';
+    //p = ft_strjoin(s, p);
+    return (p);    
 }
 char    *get_next_line(int fd)
 {
-	static char *buffer;
-	char *line;
-	
-	if(BUFFER_SIZE <= 0 || fd < 0)
-	{
-		return (NULL);
-	}
-	buffer = get_line(fd, buffer);
-	if(!buffer)
-		return (NULL);
-	line = ft_before(buffer);
-	return(line);
+    static char *saved;
+    char    *line;
+    if (!saved)
+        saved = ft_strdup("");
+    if (BUFFER_SIZE <= 0 || fd < 0)
+        return (NULL);
+    saved = get_line(fd, saved);
+    //printf("[%s]", s);
+    if(!saved)
+       return (NULL);
+    line = one_line(saved);
+    saved = before_line(saved);
+    return(line);
 }
 int main()
 {
     int fd = open("Imoon.txt", O_RDONLY);
-    printf("%s", get_next_line(fd));
+    char *a = get_next_line(fd);
+    char *b = get_next_line(fd);
+    printf("%s", a);
+    printf("%s", b);
+
     //printf("%s", get_next_line(fd));
     //printf("%s", get_next_line(fd));
     //printf("%s", get_next_line(fd));
-    //printf("%s", get_next_line(fd));
-    //system("leaks a.out");
+    close(fd);
 }
