@@ -6,7 +6,7 @@
 /*   By: iel-moha <iel-moha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 10:25:44 by iel-moha          #+#    #+#             */
-/*   Updated: 2021/12/21 11:13:41 by iel-moha         ###   ########.fr       */
+/*   Updated: 2021/12/21 12:06:50 by iel-moha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int check_newline(char *buffer)
 
     i = 0;
     if(!buffer)
-        return (0);
+        return (-1);
     while(buffer[i])
     {
        if(buffer[i] == '\n')
@@ -71,8 +71,8 @@ char    *ft_strjoin(char *s1, char *s2)
     int i;
     int j;
 
-    if (!s1 && !s2)
-        return (NULL);
+    // if (!s1 && !s2)
+    //     return (NULL);
     if(!s1)
     {
         s1 = malloc(1);
@@ -132,8 +132,7 @@ char    *get_line(int fd, char *buffer)
         }
         tmp[i] = '\0';
         buffer = ft_strjoin(buffer, tmp);
-    }
-    
+    }  
     free(tmp);
     return (buffer);
 }
@@ -143,6 +142,11 @@ char    *before_line(char *s)
     char *p;
 
     i = 0;
+    if (!s[i])
+    {
+        free(s);
+        return (NULL);
+    }
     while(s[i] && s[i] != '\n')
         i++;
     if (s[i])
@@ -160,15 +164,20 @@ char    *one_line(char *s)
     
     i = 0;
     j = 0;
+    if (!s[i])
+        return (NULL);
     while(s && s[i] && s[i] != '\n')
         i++;
-    p = malloc(i + 2);
-    while(s[j] != '\n')
+    if (s[i])
+        i++;
+    p = malloc(i + 1);
+    while(s[j] && s[j] != '\n')
     {
         p[j] = s[j];
         j++;
     }
-    p[j++] = '\n';
+    if(s[j] == '\n')
+        p[j++] = '\n';
     p[j] = '\0';
     //p = ft_strjoin(s, p);
     return (p);    
@@ -177,8 +186,7 @@ char    *get_next_line(int fd)
 {
     static char *saved;
     char    *line;
-    if (!saved)
-        saved = ft_strdup("");
+
     if (BUFFER_SIZE <= 0 || fd < 0)
         return (NULL);
     saved = get_line(fd, saved);
@@ -189,16 +197,17 @@ char    *get_next_line(int fd)
     saved = before_line(saved);
     return(line);
 }
-int main()
-{
-    int fd = open("Imoon.txt", O_RDONLY);
-    char *a = get_next_line(fd);
-    char *b = get_next_line(fd);
-    printf("%s", a);
-    printf("%s", b);
+// int main()
+// {
+//     int fd = open("Imoon.txt", O_RDONLY);
+//     char *a = get_next_line(fd);
+//     char *b = get_next_line(fd);
+//     printf("%s", a);
+//     printf("%s", b);
 
-    //printf("%s", get_next_line(fd));
-    //printf("%s", get_next_line(fd));
-    //printf("%s", get_next_line(fd));
-    close(fd);
-}
+//     //printf("%s", get_next_line(fd));
+//     //printf("%s", get_next_line(fd));
+//     //printf("%s", get_next_line(fd));
+//     close(fd);
+//     system("leaks a.out");
+// }
